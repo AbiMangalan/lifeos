@@ -2,7 +2,6 @@ import React from 'react';
 import { ChevronRight, Calendar } from 'lucide-react';
 
 const EXTRA_HABITS = [
-  { id: 'dsa', label: 'DSA' },
   { id: 'meditation', label: 'Meditation' },
   { id: 'affirmation', label: 'Affirmation' },
   { id: 'exercise', label: 'Physical Exercise' }
@@ -12,6 +11,7 @@ const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "S
 
 export default function WeeklyChecklist({ 
   week, 
+  sweWeek,
   completedItems, 
   toggleHabit, 
   getDayProgress,
@@ -30,17 +30,21 @@ export default function WeeklyChecklist({
           {DAYS_OF_WEEK.map((dayName, idx) => {
             const gtmeDay = week.days.find(d => d.day === dayName);
             let gtmeProgress = null;
-            if (gtmeDay) {
-              gtmeProgress = getDayProgress(week.weekNumber, dayName, gtmeDay.instructions);
-            }
-
             let dayTotal = EXTRA_HABITS.length;
             let dayDone = 0;
 
             if (gtmeDay) {
-              gtmeProgress = getDayProgress(week.weekNumber, dayName, gtmeDay.instructions);
+              gtmeProgress = getDayProgress('w', week.weekNumber, dayName, gtmeDay.instructions);
               dayTotal += gtmeProgress.total;
               dayDone += gtmeProgress.done;
+            }
+            
+            const sweDay = sweWeek?.days.find(d => d.day === dayName);
+            let sweProgress = null;
+            if (sweDay) {
+              sweProgress = getDayProgress('swe-w', week.weekNumber, dayName, sweDay.instructions);
+              dayTotal += sweProgress.total;
+              dayDone += sweProgress.done;
             }
 
             EXTRA_HABITS.forEach(habit => {
@@ -76,9 +80,30 @@ export default function WeeklyChecklist({
                           ${gtmeProgress.isAllDone 
                             ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
                             : 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100'}`}
-                        onClick={() => setSelectedDay({ weekNumber: week.weekNumber, ...gtmeDay })}
+                        onClick={() => setSelectedDay({ trackPrefix: 'w', weekNumber: week.weekNumber, ...gtmeDay })}
                       >
                         <span className="font-medium truncate max-w-[100px]">{gtmeProgress.isAllDone ? "Completed" : "Pending"}</span>
+                        <ChevronRight size={14} />
+                      </div>
+                    ) : (
+                      <div className="text-xs p-2 rounded border border-slate-100 bg-slate-50 text-slate-400 text-center">
+                        Rest Day
+                      </div>
+                    )}
+                  </div>
+
+                  {/* SWE Upskilling Section */}
+                  <div className="pt-2">
+                    <h5 className="text-[10px] uppercase font-bold text-slate-400 mb-1">SWE Upskilling</h5>
+                    {sweDay ? (
+                      <div 
+                        className={`text-xs p-2 rounded border cursor-pointer flex items-center justify-between transition-colors
+                          ${sweProgress.isAllDone 
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
+                            : 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100'}`}
+                        onClick={() => setSelectedDay({ trackPrefix: 'swe-w', weekNumber: week.weekNumber, ...sweDay })}
+                      >
+                        <span className="font-medium truncate max-w-[100px]">{sweProgress.isAllDone ? "Completed" : "Pending"}</span>
                         <ChevronRight size={14} />
                       </div>
                     ) : (
