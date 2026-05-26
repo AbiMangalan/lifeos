@@ -11,6 +11,7 @@ const EXTRA_HABITS = [
 const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 export default function WeeklyChecklist({ 
+  isDashboard,
   gtmeWeek, 
   sweWeek,
   completedItems, 
@@ -19,7 +20,10 @@ export default function WeeklyChecklist({
   setSelectedDay
 }) {
   const weekNumber = gtmeWeek?.weekNumber || sweWeek?.weekNumber;
-  const title = gtmeWeek?.title || sweWeek?.title || "Focus Week";
+  const rawTitle = gtmeWeek?.title || sweWeek?.title || "Focus Week";
+  
+  // Use a generic title on the dashboard to encompass all tracks
+  const title = isDashboard ? "Execution Plan" : rawTitle;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-6">

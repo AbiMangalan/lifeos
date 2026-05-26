@@ -1,7 +1,28 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Trophy, Bookmark, Printer, LogOut, Code, Flame, LayoutDashboard, ListChecks, CheckCircle2 } from 'lucide-react';
 
 export default function Header({ isLocalMode, user, progress, streak, setShowResources, handleLogout }) {
+  const location = useLocation();
+  const path = location.pathname;
+
+  // Determine which progress to show based on the active route
+  let displayProgress = progress.overall;
+  let progressLabel = "Overall Progress";
+  let barColor = "bg-emerald-500";
+
+  if (path === '/gtme') {
+    displayProgress = progress.gtme;
+    progressLabel = "GTME Track Progress";
+    barColor = "bg-indigo-600";
+  } else if (path === '/swe') {
+    displayProgress = progress.swe;
+    progressLabel = "SWE Track Progress";
+    barColor = "bg-purple-600";
+  } else if (path === '/habits') {
+    displayProgress = progress.habits;
+    progressLabel = "Daily Habits Progress";
+    barColor = "bg-emerald-500";
+  }
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-10 print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-0">
@@ -64,7 +85,7 @@ export default function Header({ isLocalMode, user, progress, streak, setShowRes
         <div className="py-4 border-t border-slate-100">
           <div className="flex justify-between items-center text-sm font-medium text-slate-600 mb-2">
             <div className="flex items-center gap-4">
-              <span>Overall Progress ({progress}%)</span>
+              <span>{progressLabel} ({displayProgress}%)</span>
               {streak && streak.current > 0 && (
                 <div className="flex items-center gap-1.5 text-orange-500 bg-orange-50 px-2 py-0.5 rounded border border-orange-100 font-bold" title={`Max Streak: ${streak.max} Days`}>
                   <Flame size={16} className={streak.current > 2 ? "animate-pulse" : ""} />
@@ -72,10 +93,10 @@ export default function Header({ isLocalMode, user, progress, streak, setShowRes
                 </div>
               )}
             </div>
-            <span className="text-emerald-500 font-bold">{progress === 100 ? 'Completed!' : ''}</span>
+            <span className="text-emerald-500 font-bold">{displayProgress === 100 ? 'Completed!' : ''}</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-            <div className="bg-emerald-500 h-2.5 rounded-full transition-all duration-500 ease-out" style={{ width: `${progress}%` }}></div>
+            <div className={`h-2.5 rounded-full transition-all duration-500 ease-out ${barColor}`} style={{ width: `${displayProgress}%` }}></div>
           </div>
         </div>
       </div>

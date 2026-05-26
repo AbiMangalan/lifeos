@@ -1,4 +1,4 @@
-import { useState } from 'react';
+
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProgressOverview from './ProgressOverview';
 import MonthHeatmap from './MonthHeatmap';
@@ -7,29 +7,30 @@ import PhaseNavigation from './PhaseNavigation';
 import { getCombinedWeeksForPhase } from '../../utils/trackMerger';
 
 export default function DashboardView({ 
+  state,
+  setState,
   completedItems,
   streak,
   toggleHabit, 
   getDayProgress,
   setSelectedDay 
 }) {
-  const [activePhase, setActivePhase] = useState(0);
-  const [activeWeekIndex, setActiveWeekIndex] = useState(0);
+  const activePhase = state.phase;
+  const activeWeekIndex = state.week;
 
   const combinedWeeks = getCombinedWeeksForPhase(activePhase);
   const currentWeek = combinedWeeks[activeWeekIndex] || combinedWeeks[0];
 
   const handlePrevWeek = () => {
-    setActiveWeekIndex(prev => Math.max(0, prev - 1));
+    setState({ week: Math.max(0, activeWeekIndex - 1) });
   };
 
   const handleNextWeek = () => {
-    setActiveWeekIndex(prev => Math.min(combinedWeeks.length - 1, prev + 1));
+    setState({ week: Math.min(combinedWeeks.length - 1, activeWeekIndex + 1) });
   };
 
   const handlePhaseChange = (newPhase) => {
-    setActivePhase(newPhase);
-    setActiveWeekIndex(0); // Reset to first week of the month
+    setState({ phase: newPhase, week: 0 }); // Reset to first week of the month
   };
 
   return (
@@ -80,6 +81,7 @@ export default function DashboardView({
         {currentWeek && (
           <WeeklyChecklist 
             key={`${activePhase}-${activeWeekIndex}`}
+            isDashboard={true}
             gtmeWeek={currentWeek.gtme}
             sweWeek={currentWeek.swe}
             completedItems={completedItems}

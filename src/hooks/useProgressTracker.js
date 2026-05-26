@@ -30,8 +30,13 @@ export const useProgressTracker = (user, isLocalMode) => {
 
   // Performance optimized progress and streak calculation
   const stats = useMemo(() => {
-    let total = 0;
-    let done = 0;
+    const counts = {
+      overall: { done: 0, total: 0 },
+      gtme: { done: 0, total: 0 },
+      swe: { done: 0, total: 0 },
+      habits: { done: 0, total: 0 }
+    };
+    
     const allDays = [];
     const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -47,10 +52,12 @@ export const useProgressTracker = (user, isLocalMode) => {
           if (gtmeDay) {
             let gtmeTaskDone = 0;
             gtmeDay.instructions.forEach((inst) => {
-              total++;
+              counts.gtme.total++;
+              counts.overall.total++;
               const id = generateTaskId('w', weekNumber, dayName, inst);
               if (completedItems[id]) {
-                done++;
+                counts.gtme.done++;
+                counts.overall.done++;
                 gtmeTaskDone++;
               }
             });
@@ -66,10 +73,12 @@ export const useProgressTracker = (user, isLocalMode) => {
            if (sweDay) {
              let sweTaskDone = 0;
              sweDay.instructions.forEach((inst) => {
-               total++;
+               counts.swe.total++;
+               counts.overall.total++;
                const id = generateTaskId('swe-w', weekNumber, dayName, inst);
                if (completedItems[id]) {
-                 done++;
+                 counts.swe.done++;
+                 counts.overall.done++;
                  sweTaskDone++;
                }
              });
@@ -81,10 +90,12 @@ export const useProgressTracker = (user, isLocalMode) => {
         
         // Check Extra Habits
         ['meditation', 'affirmation', 'exercise'].forEach(habit => {
-            total++;
+            counts.habits.total++;
+            counts.overall.total++;
             const id = generateHabitId(weekNumber, dayName, habit);
             if (completedItems[id]) {
-               done++;
+               counts.habits.done++;
+               counts.overall.done++;
             } else {
                dayAllDone = false;
             }
@@ -122,8 +133,15 @@ export const useProgressTracker = (user, isLocalMode) => {
       }
     }
 
+    const calcPct = (c) => c.total > 0 ? Math.round((c.done / c.total) * 100) : 0;
+
     return {
-      progress: Math.round((done / total) * 100) || 0,
+      progress: {
+        overall: calcPct(counts.overall),
+        gtme: calcPct(counts.gtme),
+        swe: calcPct(counts.swe),
+        habits: calcPct(counts.habits)
+      },
       streak: { current: tempStreak, max: maxStreak }
     };
   }, [completedItems, allCombinedWeeks]);

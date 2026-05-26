@@ -18,9 +18,25 @@ export default function App() {
   const [isLocalMode, setIsLocalMode] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [showResources, setShowResources] = useState(false);
+  
+  // Isolate navigation state per tab to ensure it persists during navigation
+  const [tabState, setTabState] = useState({
+    dashboard: { phase: 0, week: 0 },
+    gtme: { phase: 0 },
+    swe: { phase: 1 }, // SWE starts at Month 2
+    habits: { phase: 0 }
+  });
 
   const auth = useAuth(isLocalMode, setIsLocalMode, () => {});
   const tracker = useProgressTracker(auth.user, isLocalMode);
+
+  // Helper to update specific tab state
+  const updateTabState = (tab, newState) => {
+    setTabState(prev => ({
+      ...prev,
+      [tab]: { ...prev[tab], ...newState }
+    }));
+  };
 
   // Re-bind the external reset hook for logout
   const handleLogout = async () => {
@@ -55,6 +71,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={
             <DashboardView 
+              state={tabState.dashboard}
+              setState={(s) => updateTabState('dashboard', s)}
               completedItems={tracker.completedItems}
               streak={tracker.streak}
               toggleHabit={tracker.toggleHabit}
@@ -64,18 +82,24 @@ export default function App() {
           } />
           <Route path="/gtme" element={
             <WeeklyGrid 
+              state={tabState.gtme}
+              setState={(s) => updateTabState('gtme', s)}
               getDayProgress={tracker.getDayProgress} 
               setSelectedDay={setSelectedDay} 
             />
           } />
           <Route path="/swe" element={
             <SweView 
+              state={tabState.swe}
+              setState={(s) => updateTabState('swe', s)}
               getDayProgress={tracker.getDayProgress} 
               setSelectedDay={setSelectedDay} 
             />
           } />
           <Route path="/habits" element={
             <HabitsView 
+              state={tabState.habits}
+              setState={(s) => updateTabState('habits', s)}
               completedItems={tracker.completedItems}
               toggleHabit={tracker.toggleHabit}
             />

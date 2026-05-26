@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Calendar, CheckCircle2, Circle } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import PhaseNavigation from '../Dashboard/PhaseNavigation';
 import { getAllCombinedWeeks } from '../../utils/trackMerger';
 import { generateHabitId } from '../../utils/idGenerator';
@@ -7,13 +6,17 @@ import { generateHabitId } from '../../utils/idGenerator';
 const EXTRA_HABITS = [
   { id: 'meditation', label: 'Meditation', icon: '🧘' },
   { id: 'affirmation', label: 'Affirmation', icon: '✨' },
-  { id: 'exercise', label: 'Physical Exercise', icon: '🏃' }
+  { id: 'exercise', label: 'Exercise', icon: '🏃' }
 ];
 
 const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export default function HabitsView({ completedItems, toggleHabit }) {
-  const [activePhase, setActivePhase] = useState(0);
+export default function HabitsView({ state, setState, completedItems, toggleHabit }) {
+  const activePhase = state.phase;
+  
+  const setActivePhase = (newPhase) => {
+    setState({ phase: newPhase });
+  };
   
   // Filter weeks for the active phase
   const allWeeks = getAllCombinedWeeks();
@@ -29,54 +32,66 @@ export default function HabitsView({ completedItems, toggleHabit }) {
         setActivePhase={setActivePhase} 
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {phaseWeeks.map((week) => {
           const weekNumber = week.gtme?.weekNumber || week.swe?.weekNumber;
           const title = week.gtme?.title || week.swe?.title;
 
           return (
             <div key={weekNumber} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="bg-slate-900 px-5 py-4 flex items-center justify-between">
-                <h3 className="text-white font-bold flex items-center gap-2">
-                  <Calendar size={18} className="text-indigo-400" />
+              <div className="bg-slate-900 px-5 py-4">
+                <h3 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <Calendar size={16} className="text-indigo-400" />
                   Week {weekNumber}: {title}
                 </h3>
               </div>
 
-              <div className="p-5">
-                <div className="space-y-6">
-                  {DAYS_OF_WEEK.map((dayName) => (
-                    <div key={dayName} className="border-b border-slate-100 last:border-0 pb-4 last:pb-0">
-                      <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">{dayName}</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {EXTRA_HABITS.map((habit) => {
-                          const id = generateHabitId(weekNumber, dayName, habit.id);
-                          const isCompleted = !!completedItems[id];
+              <div className="p-2">
+                <table className="w-full text-left border-separate border-spacing-y-2">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-24">Day</th>
+                      <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Habits</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {DAYS_OF_WEEK.map((dayName) => (
+                      <tr key={dayName} className="group">
+                        <td className="px-4 py-3 align-middle border-l-4 border-transparent group-hover:border-indigo-400 transition-all bg-slate-50/50 rounded-l-xl">
+                          <span className="text-xs font-bold text-slate-600">{dayName}</span>
+                        </td>
+                        <td className="px-4 py-3 align-middle bg-slate-50/50 rounded-r-xl">
+                          <div className="flex justify-center gap-3">
+                            {EXTRA_HABITS.map((habit) => {
+                              const id = generateHabitId(weekNumber, dayName, habit.id);
+                              const isCompleted = !!completedItems[id];
 
-                          return (
-                            <div 
-                              key={habit.id}
-                              onClick={() => toggleHabit(weekNumber, dayName, habit.id)}
-                              className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                                isCompleted 
-                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-inner' 
-                                  : 'bg-slate-50 border-slate-100 text-slate-600 hover:border-indigo-200 hover:bg-white'
-                              }`}
-                            >
-                              <div className="text-lg">{habit.icon}</div>
-                              <div className="flex-1">
-                                <p className={`text-xs font-bold ${isCompleted ? 'text-emerald-700' : 'text-slate-700'}`}>
-                                  {habit.label}
-                                </p>
-                              </div>
-                              {isCompleted ? <CheckCircle2 size={18} className="text-emerald-500" /> : <Circle size={18} className="text-slate-300" />}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                              return (
+                                <button 
+                                  key={habit.id}
+                                  onClick={() => toggleHabit(weekNumber, dayName, habit.id)}
+                                  title={habit.label}
+                                  className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all w-16
+                                    ${isCompleted 
+                                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm' 
+                                      : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-200 hover:text-indigo-600'
+                                    }`}
+                                >
+                                  <div className={`text-lg transition-transform ${isCompleted ? 'scale-110' : 'grayscale opacity-50'}`}>
+                                    {habit.icon}
+                                  </div>
+                                  <span className={`text-[8px] font-black uppercase tracking-tighter ${isCompleted ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                    {habit.id}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           );

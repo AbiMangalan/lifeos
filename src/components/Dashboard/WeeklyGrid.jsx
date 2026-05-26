@@ -1,12 +1,16 @@
-import { useState } from 'react';
+
 import { Calendar } from 'lucide-react';
 import DayCard from './DayCard';
 import PhaseNavigation from './PhaseNavigation';
 import { scheduleData } from '../../data/scheduleData';
 
-export default function WeeklyGrid({ getDayProgress, setSelectedDay }) {
-  const [activePhase, setActivePhase] = useState(0);
+export default function WeeklyGrid({ state, setState, getDayProgress, setSelectedDay }) {
+  const activePhase = state.phase;
   const currentPhase = scheduleData[activePhase];
+
+  const setActivePhase = (newPhase) => {
+    setState({ phase: newPhase });
+  };
 
   if (!currentPhase) {
     return (

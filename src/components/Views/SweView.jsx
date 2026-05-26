@@ -1,12 +1,16 @@
-import { useState } from 'react';
+
 import { Calendar } from 'lucide-react';
 import DayCard from '../Dashboard/DayCard';
 import PhaseNavigation from '../Dashboard/PhaseNavigation';
 import { sweData } from '../../data/sweData';
 
-export default function SweView({ getDayProgress, setSelectedDay }) {
-  const [activePhase, setActivePhase] = useState(0);
+export default function SweView({ state, setState, getDayProgress, setSelectedDay }) {
+  const activePhase = state.phase;
   const currentPhase = sweData[activePhase];
+
+  const setActivePhase = (newPhase) => {
+    setState({ phase: newPhase });
+  };
 
   if (!currentPhase || currentPhase.weeks.length === 0) {
     return (
