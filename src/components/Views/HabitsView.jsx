@@ -35,14 +35,13 @@ export default function HabitsView({ state, setState, completedItems, toggleHabi
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {phaseWeeks.map((week) => {
           const weekNumber = week.gtme?.weekNumber || week.swe?.weekNumber;
-          const title = week.gtme?.title || week.swe?.title;
 
           return (
             <div key={weekNumber} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
               <div className="bg-slate-900 px-5 py-4">
                 <h3 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
                   <Calendar size={16} className="text-indigo-400" />
-                  Week {weekNumber}: {title}
+                  Week {weekNumber}
                 </h3>
               </div>
 
