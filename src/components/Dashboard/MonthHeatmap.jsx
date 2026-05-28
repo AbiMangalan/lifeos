@@ -74,7 +74,10 @@ export default function MonthHeatmap({
       <div className="relative overflow-hidden group">
         
         {/* MOBILE ONLY: Frozen Overlay Panel (Outside scrollable layer) */}
-        <div className="lg:hidden absolute left-0 top-0 bottom-0 z-30 w-32 bg-white pointer-events-none flex flex-col p-4 overflow-hidden">
+        {/* Extends slightly past left-0 with a negative inset to cover the card border/padding gap */}
+        <div className="lg:hidden absolute left-0 top-0 bottom-0 z-30 w-32 bg-white pointer-events-none flex flex-col p-4 overflow-visible">
+           {/* Hard left edge seal — covers any sub-pixel gap between card border and overlay */}
+           <div className="absolute top-0 bottom-0 -left-px w-px bg-white"></div>
            {/* Vertical Spacer for Axis */}
            <div className="h-6 mb-3"></div>
            {/* Habit Label Column (Cloned for fixed position) */}
@@ -87,11 +90,12 @@ export default function MonthHeatmap({
                </div>
              ))}
            </div>
-           {/* Smooth Mask Edge Transition - Strictly clipped inside panel */}
-           <div className="absolute top-0 bottom-0 right-0 w-4 bg-gradient-to-r from-white to-transparent translate-x-full"></div>
+           {/* Feathered right edge — sits inside the panel, softens the transition into scrollable content */}
+           <div className="absolute top-0 bottom-0 right-0 w-6 bg-gradient-to-r from-white via-white/80 to-transparent"></div>
         </div>
 
         {/* Scrollable Container */}
+        {/* Note: on mobile the left p-4 is intentionally kept so the label spacer aligns; the frozen overlay covers it */}
         <div className="overflow-x-auto no-scrollbar scroll-smooth">
           <div className="inline-block min-w-full align-middle p-4 lg:p-6">
             <div className="flex flex-col">
