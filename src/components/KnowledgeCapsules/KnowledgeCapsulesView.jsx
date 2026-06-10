@@ -41,15 +41,22 @@ const SWIMLANES = [
 ];
 
 export default function KnowledgeCapsulesView({ user }) {
-  const { capsules, loading, addCapsule, deleteCapsule } = useKnowledgeCapsules(user);
+  const { capsules, loading, addCapsule, deleteCapsule, updateCapsule } = useKnowledgeCapsules(user);
   const [showModal, setShowModal] = useState(false);
 
   const capsulesByCategory = useMemo(() => {
     return SWIMLANES.reduce((acc, lane) => {
-      acc[lane.key] = capsules.filter(c => c.category === lane.key);
+      const items = capsules.filter(c => c.category === lane.key);
+      // unconsumed first (preserving addedAt desc order), consumed sink to bottom
+      acc[lane.key] = [
+        ...items.filter(c => !c.consumed),
+        ...items.filter(c => c.consumed)
+      ];
       return acc;
     }, {});
   }, [capsules]);
+
+  const handleToggleConsumed = (id, current) => updateCapsule(id, { consumed: !current });
 
   const isLocalMode = user?.uid === 'local_dev';
 
@@ -118,6 +125,9 @@ export default function KnowledgeCapsulesView({ user }) {
         if (!items || items.length === 0) return null;
         const Icon = lane.icon;
 
+        const pending = items.filter(c => !c.consumed).length;
+        const done = items.length - pending;
+
         return (
           <div key={lane.key} className={`rounded-2xl border ${lane.borderColor} ${lane.sectionBg} overflow-hidden`}>
             <div className={`${lane.headerBg} px-5 py-3 flex items-center gap-2`}>
@@ -125,9 +135,16 @@ export default function KnowledgeCapsulesView({ user }) {
               <h3 className="text-white font-bold text-sm uppercase tracking-wider">
                 {lane.label}
               </h3>
-              <span className="ml-auto bg-white/20 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
-                {items.length}
-              </span>
+              <div className="ml-auto flex items-center gap-1.5">
+                <span className="bg-white/20 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+                  {pending} left
+                </span>
+                {done > 0 && (
+                  <span className="bg-white/10 text-white/70 text-xs font-bold px-2 py-0.5 rounded-full">
+                    {done} done
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -136,6 +153,7 @@ export default function KnowledgeCapsulesView({ user }) {
                   key={capsule.id}
                   capsule={capsule}
                   onDelete={deleteCapsule}
+                  onToggleConsumed={handleToggleConsumed}
                 />
               ))}
             </div>

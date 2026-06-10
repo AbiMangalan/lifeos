@@ -46,7 +46,7 @@ export const useKnowledgeCapsules = (user) => {
   const addCapsule = useCallback(async (capsuleData) => {
     if (!user || user.uid === 'local_dev') return;
     const colRef = collection(db, 'users', user.uid, 'knowledge_capsules');
-    await addDoc(colRef, { ...capsuleData, addedAt: serverTimestamp() });
+    await addDoc(colRef, { ...capsuleData, consumed: false, addedAt: serverTimestamp() });
   }, [user]);
 
   const updateCapsule = useCallback(async (capsuleId, updates) => {

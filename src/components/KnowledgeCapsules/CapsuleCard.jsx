@@ -1,4 +1,4 @@
-import { ExternalLink, Trash2, PlayCircle, Briefcase, FileText, Globe } from 'lucide-react';
+import { ExternalLink, Trash2, PlayCircle, Briefcase, FileText, Globe, Circle, CheckCircle2 } from 'lucide-react';
 
 const CATEGORY_STYLES = {
   youtube: {
@@ -31,11 +31,12 @@ const CATEGORY_STYLES = {
   }
 };
 
-export default function CapsuleCard({ capsule, onDelete }) {
+export default function CapsuleCard({ capsule, onDelete, onToggleConsumed }) {
   const style = CATEGORY_STYLES[capsule.category] || CATEGORY_STYLES.other;
+  const consumed = !!capsule.consumed;
 
   return (
-    <div className={`rounded-xl border ${style.border} ${style.bg} overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col`}>
+    <div className={`rounded-xl border ${style.border} ${style.bg} overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col ${consumed ? 'opacity-55' : ''}`}>
       {capsule.thumbnail && (
         <img
           src={capsule.thumbnail}
@@ -49,16 +50,26 @@ export default function CapsuleCard({ capsule, onDelete }) {
           <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 ${style.badge}`}>
             {style.icon} {style.label}
           </span>
-          <button
-            onClick={() => onDelete(capsule.id)}
-            className="text-slate-300 hover:text-red-500 transition-colors p-0.5 shrink-0 mt-0.5"
-            aria-label="Delete capsule"
-          >
-            <Trash2 size={14} />
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => onToggleConsumed(capsule.id, consumed)}
+              className={`transition-colors p-0.5 ${consumed ? 'text-emerald-500 hover:text-emerald-600' : 'text-slate-300 hover:text-emerald-500'}`}
+              aria-label={consumed ? 'Mark as unread' : 'Mark as consumed'}
+              title={consumed ? 'Mark as unread' : 'Mark as done'}
+            >
+              {consumed ? <CheckCircle2 size={15} /> : <Circle size={15} />}
+            </button>
+            <button
+              onClick={() => onDelete(capsule.id)}
+              className="text-slate-300 hover:text-red-500 transition-colors p-0.5"
+              aria-label="Delete capsule"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
         </div>
 
-        <h3 className="font-bold text-slate-800 text-sm leading-snug mb-1.5 line-clamp-2">
+        <h3 className={`font-bold text-sm leading-snug mb-1.5 line-clamp-2 ${consumed ? 'line-through text-slate-400' : 'text-slate-800'}`}>
           {capsule.title}
         </h3>
 
