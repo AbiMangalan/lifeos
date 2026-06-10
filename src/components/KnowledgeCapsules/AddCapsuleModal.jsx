@@ -8,7 +8,7 @@ function detectCategory(url) {
     if (host === 'linkedin.com') return 'linkedin';
     return 'article';
   } catch {
-    return 'other';
+    return 'article';
   }
 }
 
@@ -38,7 +38,7 @@ export default function AddCapsuleModal({ onClose, onSave }) {
       try {
         data = JSON.parse(text);
       } catch {
-        throw new Error(`Server returned non-JSON (status ${res.status}). Is netlify dev running with GEMINI_API_KEY set in .env?`);
+        throw new Error(`Could not reach the summarization service (status ${res.status}). Please try again.`);
       }
       if (!res.ok) throw new Error(data.error || 'Failed to process URL');
 

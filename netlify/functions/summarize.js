@@ -112,8 +112,19 @@ export const handler = async (event) => {
     const body = JSON.parse(event.body || '{}');
     url = body.url?.trim();
     if (!url) throw new Error('url is required');
-    new URL(url);
-    if (!url.startsWith('https://')) throw new Error('Only HTTPS URLs are supported');
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:') throw new Error('Only HTTPS URLs are supported');
+    // Block SSRF: reject loopback, link-local, and private addresses
+    const host = parsed.hostname.toLowerCase();
+    const isPrivate =
+      host === 'localhost' ||
+      host.startsWith('127.') ||
+      host.startsWith('10.') ||
+      host.startsWith('192.168.') ||
+      host.startsWith('169.254.') ||
+      host === '::1' ||
+      host.endsWith('.local');
+    if (isPrivate) throw new Error('URL not allowed');
   } catch (err) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: err.message }) };
   }
